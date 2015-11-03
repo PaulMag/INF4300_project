@@ -199,19 +199,11 @@ if __name__ == '__main__':
                 ax=ax[i],
             )
             fstr += "%s_" % f
-        degtext = str(angle.astype(int)) + " deg"
-        degtext1 = degtext[:21]
-        degtext2 = degtext[21:]
-        fig.text(
-            0.55, 0.20,
-            "window  = %2d px\n"
-            "distance = %2d px\n"
-            "angle      = %s\n"
-            "                  %s"
-            % (w, d, degtext1, degtext2)
+        fig.suptitle(
+            r"%s, w=%d, d=%d, angle=%s$^o$"
+            % (title, w, d, str(angle.astype(int))),
+            fontsize=16
         )
-        fig.suptitle(title, fontsize=16)
-        plt.tight_layout()
         if args.save:
             plt.savefig("figures/%s%s_d%02d_a%03d-%1d_w%02d.png" \
                 % (fstr, title, d, int(angle[0]), len(angle), w))
