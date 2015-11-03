@@ -183,29 +183,22 @@ if __name__ == '__main__':
 
     if args.glide:
         # map_homo, map_iner, map_clsh = glide(img, w, [d], angle, levels, step)
-        map_Q1 = glide(img, args.f, w, [d], angle, levels, step)
-        print map_Q1
-        sys.exit(0)
+        fmaps = glide(img, args.f, w, [d], angle, levels, step)
         fig = plt.figure()
-        ax = []
-        ax.append(fig.add_subplot(2,2,1))
-        ax.append(fig.add_subplot(2,2,2))
-        ax.append(fig.add_subplot(2,2,3))
-        ax[0].set_title("Q1")
-        ax[1].set_title("Q2")
-        ax[2].set_title("Q4")
-        plt.colorbar(
-            ax[0].imshow(map_Q1, cmap='hot', interpolation='nearest'),
-            ax=ax[0],
-        )
-        plt.colorbar(
-            ax[1].imshow(map_Q2, cmap='hot', interpolation='nearest'),
-            ax=ax[1],
-        )
-        plt.colorbar(
-            ax[2].imshow(map_Q4, cmap='hot', interpolation='nearest'),
-            ax=ax[2],
-        )
+        nplots = [
+            int(round(np.sqrt(len(args.f)))),  # No of columns.
+            int(np.ceil(np.sqrt(len(args.f)))),  # No of rows.
+            len(args.f),  # Total no of density profile plots.
+        ]
+        ax = [None] * nplots[2]
+        for i, f in enumerate(args.f):
+            print i, f
+            ax[i] = fig.add_subplot(nplots[0], nplots[1], i+1)
+            ax[i].set_title(f)
+            plt.colorbar(
+                ax[i].imshow(fmaps[f], cmap='hot', interpolation='nearest'),
+                ax=ax[i],
+            )
         degtext = str(angle.astype(int)) + " deg"
         degtext1 = degtext[:21]
         degtext2 = degtext[21:]
