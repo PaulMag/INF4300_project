@@ -182,7 +182,6 @@ if __name__ == '__main__':
                 % (title, d, int(angle[0]), len(angle), w))
 
     if args.glide:
-        # map_homo, map_iner, map_clsh = glide(img, w, [d], angle, levels, step)
         fmaps = glide(img, args.f, w, [d], angle, levels, step)
         fig = plt.figure()
         nplots = [
@@ -191,14 +190,15 @@ if __name__ == '__main__':
             len(args.f),  # Total no of density profile plots.
         ]
         ax = [None] * nplots[2]
+        fstr = ""
         for i, f in enumerate(args.f):
-            print i, f
             ax[i] = fig.add_subplot(nplots[0], nplots[1], i+1)
             ax[i].set_title(f)
             plt.colorbar(
                 ax[i].imshow(fmaps[f], cmap='hot', interpolation='nearest'),
                 ax=ax[i],
             )
+            fstr += "%s_" % f
         degtext = str(angle.astype(int)) + " deg"
         degtext1 = degtext[:21]
         degtext2 = degtext[21:]
@@ -213,17 +213,15 @@ if __name__ == '__main__':
         fig.suptitle(title, fontsize=16)
         plt.tight_layout()
         if args.save:
-            plt.savefig("figures/glide_%s_d%02d_a%03d-%1d_w%02d.png" \
-                % (title, d, int(angle[0]), len(angle), w))
-            for fname, fmap in \
-                zip(("Q1", "Q2", "Q4"), (map_Q1, map_Q2, map_Q4)):
-                # zip(("homo", "iner", "clsh"), (map_homo, map_iner, map_clsh)):
+            plt.savefig("figures/%s%s_d%02d_a%03d-%1d_w%02d.png" \
+                % (fstr, title, d, int(angle[0]), len(angle), w))
+            for f in args.f:
                 outfile = open(
                     "features/%s_%s_d%02d_a%03d-%1d_w%02d.p"
-                    % (fname, title, d, int(angle[0]), len(angle), w),
+                    % (f, title, d, int(angle[0]), len(angle), w),
                     "wb",
                 )
-                pickle.dump(fmap, outfile)
+                pickle.dump(fmaps[f], outfile)
 
     if args.weight:
         fig = plt.figure()
