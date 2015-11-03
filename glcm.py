@@ -10,19 +10,23 @@ from skimage.exposure import equalize_hist, equalize_adapthist
 from segment import make_folder
 
 
-def glide(image, w, d, theta, levels=16, step=2):
+def glide(image, features, w, d, theta, levels=16, step=2):
 
     image = np.pad(image, int(w/2), mode='reflect')
     M, N = image.shape
-    # map_homo = np.zeros((M, N))
-    # map_iner = np.zeros((M, N))
-    # map_clsh = np.zeros((M, N))
-    map_Q1 = np.zeros((M, N))
-    map_Q2 = np.zeros((M, N))
-    map_Q4 = np.zeros((M, N))
+    fmaps = {}
+
+    try:
+        for f in features:
+            fmaps[f] = np.zeros((M, N))
+    except TypeError:
+        raise KeyError(
+            "You have to provide the name of at least one feature to analyse "
+            "with the gliding window, f.ex.: '--f Q1 Q2'"
+        )
 
     for m in xrange(0, M, step):
-        print m
+        print "%5.1f %%" % (100. * m / M)
         for n in xrange(0, N, step):
             window = image[m:m+w, n:n+w]
             P = greycomatrix(
@@ -30,15 +34,11 @@ def glide(image, w, d, theta, levels=16, step=2):
                 symmetric=True, normed=True,
             ).mean(axis=(2,3)) / float(len(d) * len(theta))
             mu = np.mean(window)
-            # map_homo[m:m+step, n:n+step] = homogeneity(P)
-            # map_iner[m:m+step, n:n+step] = inertia(P)
-            # map_clsh[m:m+step, n:n+step] = clustershade(P)
-            map_Q1[m:m+step, n:n+step] = Q1(P)
-            map_Q2[m:m+step, n:n+step] = Q2(P)
-            map_Q4[m:m+step, n:n+step] = Q4(P)
+            for f in features:
+                fmaps[f][m:m+step, n:n+step] = featuredict[f](P)
+    print "%5.1f %%" % (100.)
 
-    # return map_homo, map_iner, map_clsh
-    return map_Q1, map_Q2, map_Q4
+    return fmaps
 
 
 levels = 16  # hardcoded number of levels
@@ -60,6 +60,7 @@ def clustershade(P):
 
 def Q1(P):
     return P[0:levels/2 , 0:levels/2].sum() / P.sum()
+
 def Q2(P):
     return P[0:levels/2 , levels/2:levels].sum() / P.sum()
 def Q21(P):
@@ -70,10 +71,29 @@ def Q23(P):
     return P[levels/4 : 2*levels/4 , 2*levels/4 : 3*levels/4].sum() / P.sum()
 def Q24(P):
     return P[3*levels/4:levels , levels/4:2*levels/4].sum() / P.sum()
+
 def Q3(P):
     return P[levels/2:levels , 0:levels/2].sum() / P.sum()
 def Q4(P):
     return P[levels/2:levels , levels/2:levels].sum() / P.sum()
+
+featuredict = {
+    "homo" : homogeneity,
+    "homogeneity" : homogeneity,
+    "iner" : inertia,
+    "inertia" : inertia,
+    "clsh" : clustershade,
+    "cluster" : clustershade,
+    "clustershade" : clustershade,
+    "Q1" : Q1,
+    "Q2" : Q2,
+    "Q21" : Q21,
+    "Q22" : Q22,
+    "Q23" : Q23,
+    "Q24" : Q24,
+    "Q3" : Q3,
+    "Q4" : Q4,
+}
 
 
 if __name__ == '__main__':
@@ -84,6 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('--g', '--grid',     type=int, default=2)
     parser.add_argument('--d', '--distance', type=int, default=1)
     parser.add_argument('--a', '--angle',  type=float, default=[0], nargs='+')
+    parser.add_argument('--f', '--features', type=str, default=None, nargs='+')
     parser.add_argument('--w', '--window',   type=int, default=31)
     parser.add_argument('--s', '--step',     type=int, default=2)
     parser.add_argument('--show', action='store_true')  # show figures
@@ -162,15 +183,14 @@ if __name__ == '__main__':
 
     if args.glide:
         # map_homo, map_iner, map_clsh = glide(img, w, [d], angle, levels, step)
-        map_Q1, map_Q2, map_Q4 = glide(img, w, [d], angle, levels, step)
+        map_Q1 = glide(img, args.f, w, [d], angle, levels, step)
+        print map_Q1
+        sys.exit(0)
         fig = plt.figure()
         ax = []
         ax.append(fig.add_subplot(2,2,1))
         ax.append(fig.add_subplot(2,2,2))
         ax.append(fig.add_subplot(2,2,3))
-        # ax[0].set_title("homogeneity")
-        # ax[1].set_title("inertia")
-        # ax[2].set_title("cluster shade")
         ax[0].set_title("Q1")
         ax[1].set_title("Q2")
         ax[2].set_title("Q4")
