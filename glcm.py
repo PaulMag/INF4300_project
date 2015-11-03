@@ -60,6 +60,14 @@ def clustershade(P):
 
 def Q1(P):
     return P[0:levels/2 , 0:levels/2].sum() / P.sum()
+def Q11(P):
+    return P[0 : levels/4 , 0 : levels/4].sum() / P.sum()
+def Q12(P):
+    return P[0 : levels/4 , 1*levels/4 : 2*levels/4].sum() / P.sum()
+def Q13(P):
+    return P[1*levels/4 : 2*levels/4 , 0 : levels/4].sum() / P.sum()
+def Q14(P):
+    return P[1*levels/4 : 2*levels/4 , 1*levels/4 : 2*levels/4].sum() / P.sum()
 
 def Q2(P):
     return P[0:levels/2 , levels/2:levels].sum() / P.sum()
@@ -86,6 +94,10 @@ featuredict = {
     "cluster" : clustershade,
     "clustershade" : clustershade,
     "Q1" : Q1,
+    "Q11" : Q11,
+    "Q12" : Q12,
+    "Q13" : Q13,
+    "Q14" : Q14,
     "Q2" : Q2,
     "Q21" : Q21,
     "Q22" : Q22,
