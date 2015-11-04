@@ -1,0 +1,4 @@
+*.pyc
+
+.dropbox.attr
+.ipynb_checkpoints/
