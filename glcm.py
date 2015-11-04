@@ -133,15 +133,27 @@ if __name__ == '__main__':
     step = args.s
 
     if not args.filename is None:
-        try:
-            img = np.array(Image.open(args.filename), dtype='uint8')
-        except IOError:
-            # Assume MATLAB matrix.
-            mat = sio.loadmat(args.filename)
-            for key in mat.keys():
-                if not key.endswith("__"):
-                    img = np.array(mat[key], dtype='uint8')
-                    break
+        if args.filename.endswith('.txt') or args.filename.endswith('.dat'):
+            img = []
+            infile = open(args.filename, 'r')
+            line = infile.readline()
+            delimeter = None
+            if ',' in line:
+                delimeter = ','
+            img.append(line.split(delimeter))  # Add the first line.
+            for line in infile:  # Add the rest.
+                img.append(line.split(delimeter))
+            img = np.array(img, dtype='uint8')
+        else:
+            try:
+                img = np.array(Image.open(args.filename), dtype='uint8')
+            except IOError:
+                # Assume MATLAB matrix.
+                mat = sio.loadmat(args.filename)
+                for key in mat.keys():
+                    if not key.endswith("__"):
+                        img = np.array(mat[key], dtype='uint8')
+                        break
         if not args.n is None:
             N = np.array(img.shape, dtype=int) / args.g
             nx, ny = (args.n - 1) % args.g, (args.n - 1) / args.g
