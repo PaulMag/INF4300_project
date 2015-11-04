@@ -1,3 +1,4 @@
+import os
 import sys
 import argparse
 import numpy as np
@@ -121,6 +122,7 @@ if __name__ == '__main__':
     parser.add_argument('--s', '--step',     type=int, default=2)
     parser.add_argument('--show', action='store_true')  # show figures
     parser.add_argument('--save', action='store_true')
+    parser.add_argument('--png', action='store_true')  # resave img as PNG
     parser.add_argument('--img', action='store_true')  # make input image figure
     parser.add_argument('--hist', action='store_true')  # make histogram figure
     parser.add_argument('--glcm', action='store_true')
@@ -154,6 +156,11 @@ if __name__ == '__main__':
                     if not key.endswith("__"):
                         img = np.array(mat[key], dtype='uint8')
                         break
+        if args.png:
+            outpath = args.filename.split('/')[0]
+            outname = args.filename.split('/')[~0].split('.')[0] + '.png'
+            result = Image.fromarray(img)
+            result.save(os.path.join(outpath, outname))
         if not args.n is None:
             N = np.array(img.shape, dtype=int) / args.g
             nx, ny = (args.n - 1) % args.g, (args.n - 1) / args.g
