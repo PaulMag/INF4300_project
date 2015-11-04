@@ -216,8 +216,8 @@ if __name__ == '__main__':
         fmaps = glide(img, args.f, w, [d], angle, levels, step)
         fig = plt.figure()
         nplots = [
-            int(round(np.sqrt(len(args.f)))),  # No of columns.
-            int(np.ceil(np.sqrt(len(args.f)))),  # No of rows.
+            int(round(np.sqrt(len(args.f)))),  # No of rows.
+            int(np.ceil(np.sqrt(len(args.f)))),  # No of columns.
             len(args.f),  # Total no of density profile plots.
         ]
         ax = [None] * nplots[2]
